@@ -1,0 +1,4 @@
+name = "Exospeco"
+uuid = "b61e09fa-05d4-4f80-b2b0-89285ca326c8"
+authors = ["Samuel Thé <the.samuel.ad@gmail.com>"]
+version = "0.1.0"
