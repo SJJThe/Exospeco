@@ -18,10 +18,6 @@ export CalibratedLSSData,
        fitCompanion,
        fitStar!,
        fitStar,
-       get_data,
-       get_weights,
-       get_spatial_law,
-       get_spectral_law,
        initialize!,
        initialize,
        lambda_ref,
@@ -35,6 +31,7 @@ export CalibratedLSSData,
        
        
 import Base: show
+using ExospecoCalibration: GeoCalib
 using InterpolationKernels
 using LinearAlgebra
 using LazyAlgebra

@@ -98,7 +98,7 @@ function exospeco(x0::AbstractVector{T},
     Rz = mu_z*quadraticsmoothness
     
     return exospeco!(copy(x0), copy(y0), copy(nu_star0), copy(z0), copy(nu_comp0),
-                     D.d, D.w, D.rho_map, D.lambda_map, Rx, Ry, Rz; kwds...)
+                     D.d, D.w, D.rho, D.lambda, Rx, Ry, Rz; kwds...)
 end
 
 
@@ -197,8 +197,8 @@ function fitStar(x0::AbstractVector{T}, # stellar SED
     Rx = mu_x*quadraticsmoothness
     Ry = quadraticsmoothness
 
-    return fitStar!(copy(x0), copy(y0), copy(nu_star0), D.d, D.w, D.rho_map, 
-                    D.lambda_map, Rx, Ry; kwds...)
+    return fitStar!(copy(x0), copy(y0), copy(nu_star0), D.d, D.w, D.rho, 
+                    D.lambda, Rx, Ry; kwds...)
 end
 
 
@@ -271,7 +271,7 @@ function fitCompanion(z0::AbstractVector{T},
     
     Rz = mu_z*quadraticsmoothness
     
-    return fitCompanion!(copy(z0), copy(nu_comp0), D.d, D.w, D.rho_map, 
-                         D.lambda_map, nu_star, Rz; kwds...)
+    return fitCompanion!(copy(z0), copy(nu_comp0), D.d, D.w, D.rho, 
+                         D.lambda, nu_star, Rz; kwds...)
 end
 

@@ -2,3 +2,21 @@ name = "Exospeco"
 uuid = "b61e09fa-05d4-4f80-b2b0-89285ca326c8"
 authors = ["Samuel Thé <the.samuel.ad@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+ExospecoCalibration = "62678add-b728-45b6-bdcd-9e69f53ee567"
+InterpolationKernels = "16730964-a2ec-11e9-36fa-47a4f82bfac6"
+LazyAlgebra = "aeaa251e-9d76-11e9-311b-83636bf44738"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+LinearInterpolators = "2fc109c4-9d77-11e9-32ff-e5c650334c16"
+OptimPackNextGen = "080ffe24-4a27-4ab0-ad71-7b624e73ef8d"
+
+[compat]
+ExospecoCalibration = "0.1"
+LazyAlgebra = "0.2"
+LinearInterpolators = "0.1"
+OptimPackNextGen = "0.3"
+
+[extras]
+EasyFITS = "a977f4a2-36a7-4172-89e7-19c2726f82e5"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"

@@ -75,6 +75,6 @@ function initialize(N_x::Int,
     kwds...) where {T,N}
 
     return initialize!(zeros(N_x), zeros(N_y), [rho_star], zeros(N_z), [rho_comp], 
-                       D.d, D.w, D.rho_map, D.lambda_map; kwds...)
+                       D.d, D.w, D.rho, D.lambda; kwds...)
 end
 

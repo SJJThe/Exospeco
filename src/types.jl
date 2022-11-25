@@ -1,66 +1,67 @@
 
 
 """
-"""
-struct CalibratedLSSData{T<:Real,M}
-    d::AbstractArray{T,M}
-    w::AbstractArray{T,M}
-    rho_map::AbstractMatrix{T}
-    lambda_map::AbstractMatrix{T}
+    CalibratedLSSData(d, w, rho, lambda) -> D
 
-    function CalibratedLSSData{T,M}(d::AbstractArray{T,M},
-                                    w::AbstractArray{T,M},
-                                    rho_map::AbstractMatrix{T},
-                                    lambda_map::AbstractMatrix{T}) where {T<:Real,M}
+Yields a structure `D` containing the data `d` and their respective weights 
+`w`, the angular separation `rho` and wavelength `lambda` maps calibrating the
+detector.
+A `GeoCalib` structure can be given to take into account a `mask` of valid 
+pixels. In that case the two following command are equivalent:
+
+```
+D = CalibratedLSSData(d, w .* mask, rho, lambda)
+
+G = GeoCalib(rho, lambda, mask)
+D = CalibratedLSSData(d, w, G)
+```
+
+"""
+struct CalibratedLSSData{T<:AbstractFloat,N,D<:AbstractArray{T,N},
+                         W<:AbstractArray{T,N},R<:AbstractMatrix{T},
+                         L<:AbstractMatrix{T}}
+    d::D
+    w::W
+    rho::R
+    lambda::L
+
+    function CalibratedLSSData(d::D,
+                               w::W,
+                               rho::R,
+                               lambda::L) where {T<:Real,N,
+                                                     D<:AbstractArray{T,N},
+                                                     W<:AbstractArray{T,N},
+                                                     R<:AbstractMatrix{T},
+                                                     L<:AbstractMatrix{T}}
         @assert axes(d) == axes(w)
-        @assert (axes(d,1), axes(d,2)) == axes(rho_map) == axes(lambda_map)
-        if M == 3
+        @assert (axes(d,1), axes(d,2)) == axes(rho) == axes(lambda)
+        if N == 3
             @warn "Processing of multiframe dataset has not yet been implemented."
         end
-        return new{T,M}(d, w, rho_map, lambda_map)
+        return new{T,N,D,W,R,L}(d, w, rho, lambda)
     end
 end
-get_data(D::CalibratedLSSData) = D.d
-get_weights(D::CalibratedLSSData) = D.w
-get_spatial_law(D::CalibratedLSSData) = D.rho_map
-get_spectral_law(D::CalibratedLSSData) = D.lambda_map
 
-function CalibratedLSSData(d::AbstractArray{T,M},
-    w::AbstractArray{T,M},
-    rho_map::AbstractMatrix{T},
-    lambda_map::AbstractMatrix{T}) where {T<:Real,M}
-    
-    return CalibratedLSSData{T,M}(d, w, rho_map, lambda_map)
+Base.axes(D::CalibratedLSSData) = axes(D.d)
+Base.size(D::CalibratedLSSData) = size(D.d)
+Base.eltype(D::CalibratedLSSData) = eltype(typeof(D))
+Base.eltype(::Type{<:CalibratedLSSData{T}}) where {T} = T
+Base.show(io::IO, D::CalibratedLSSData{T}) where {T} = begin
+    print(io,"CalibratedLSSData{$T}:")
+    print(io,"\n - scientific data `d` : ",typeof(D.d))
+    print(io,"\n - weight of data `w` : ",typeof(D.w))
+    print(io,"\n - spatial geometric map `rho` : ",typeof(D.rho))
+    print(io,"\n - spectral geometric map `lambda` : ",typeof(D.lambda))
 end
 
-Base.size(D::CalibratedLSSData) = size(get_data(D))
-Base.eltype(D::CalibratedLSSData{T,M}) where {T,M} = T
-Base.show(io::IO, D::CalibratedLSSData{T,M}) where {T,M} = begin
-    print(io,"CalibratedLSSData{$T,$M}:")
-    print(io,"\n - scientific data `d` : ",typeof(get_data(D)))
-    print(io,"\n - weight of data `w` : ",typeof(get_weights(D)))
-    print(io,"\n - spatial geometric map `rho_map` : ",typeof(get_spatial_law(D)))
-    print(io,"\n - spectral geometric map `lambda_map` : ",typeof(get_spectral_law(D)))
+function CalibratedLSSData(d::AbstractArray{T,N},
+    w::AbstractArray{T,N},
+    G::GeoCalib{T}) where {T,N}
+
+    return CalibratedLSSData(d, w .* G.mask, G.rho, G.lambda)
 end
 
 
-
-
-"""
-    call!([α::Real=1,] f, x, g; incr::Bool = false)
-
-gives back the value of α*f(x) while updating its gradient in g. incr is a
-boolean indicating if the gradient needs to be incremanted or reseted.
-
-"""
-call!(f, x, g; kwds...) = call!(1.0, f, x, g; kwds...)
-"""
-    call([α::Real=1,] f, x)
-
-yields the value of α*f(x).
-
-"""
-call(f, x) = call(1.0, f, x)
 
 
 
@@ -89,6 +90,25 @@ function Interpolator(k, map::AbstractArray{T,M}, N::Int) where {T,M}
     return Interpolator(k, pos)
 end
 
+
+
+
+
+"""
+    call!([α::Real=1,] f, x, g; incr::Bool = false)
+
+gives back the value of α*f(x) while updating its gradient in g. incr is a
+boolean indicating if the gradient needs to be incremanted or reseted.
+
+"""
+call!(f, x, g; kwds...) = call!(1.0, f, x, g; kwds...)
+"""
+    call([α::Real=1,] f, x)
+
+yields the value of α*f(x).
+
+"""
+call(f, x) = call(1.0, f, x)
 
 
 
