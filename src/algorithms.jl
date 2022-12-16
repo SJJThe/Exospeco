@@ -18,10 +18,11 @@ function exospeco!(x::AbstractVector{T},
     delay_auto_calib::Bool = false,
     nonnegative::Bool = false,
     maxiter::Integer = 10,
+    rho_pix::Real = rho_pixel,
     alphatol::Float64 = 0.1,
     z_tol::Real = 3.0,
     alg_tol::Tuple{Real,Real} = (0.0,1e-3),
-    nu_star_box::AbstractVector{T} = [-2rho_pixel, 2rho_pixel],
+    nu_star_box::AbstractVector{T} = [-2rho_pix, 2rho_pix],
     nu_z_box::AbstractVector{T} = [50.0, 2.0],
     wordy::Bool = false,
     solvekwds...) where {T,N}
@@ -54,16 +55,16 @@ function exospeco!(x::AbstractVector{T},
         residuals_star!(res, dat, lambda, rho, nu_star, nu_comp, z)
         # Update stellar leakage model
         fitStar!(x, y, nu_star, res, wgt_prime, rho, lambda, Rx, Ry;
-                 auto_calib=auto_calib, nonnegative=nonnegative, maxiter=maxiter, 
-                 alphatol=alphatol, tol=alg_tol, nu_box=nu_star_box, wordy=wordy, 
-                 solvekwds...)
+                 auto_calib=auto_calib, nonnegative=nonnegative, rho_pix=rho_pix, 
+                 maxiter=maxiter, alphatol=alphatol, tol=alg_tol, nu_box=nu_star_box, 
+                 wordy=wordy, solvekwds...)
         
         # Residuals r_comp
         residuals_comp!(res, dat, lambda, rho, nu_star, y, x)
         # Update companion model
         fitCompanion!(z, nu_comp, res, wgt, rho, lambda, nu_star, Rz;
-               auto_calib=auto_calib, nonnegative=nonnegative, maxiter=maxiter, 
-               tol=alg_tol, nu_box=nu_z_box, wordy=wordy, solvekwds...)
+               auto_calib=auto_calib, nonnegative=nonnegative, rho_pix=rho_pix, 
+               maxiter=maxiter, tol=alg_tol, nu_box=nu_z_box, wordy=wordy, solvekwds...)
         
         # stop criterions
         iter += 1
@@ -116,11 +117,12 @@ function fitStar!(x::AbstractVector{T}, # stellar SED
     Ry::HomogeneousRegularization;
     auto_calib::Bool = false,
     nonnegative::Bool = false,
+    rho_pix::Real = rho_pixel,
     alpha::Float64 = 1.0,
     maxiter::Integer = 10,
     alphatol::Float64 = 0.1,
     tol::Tuple{Real,Real} = (0.0, 1e-6),
-    nu_box::AbstractVector{T} = [-2rho_pixel, 2rho_pixel],
+    nu_box::AbstractVector{T} = [-2rho_pix, 2rho_pix],
     wordy::Bool = false,
     solvekwds...) where {T<:AbstractFloat,N}
                 
@@ -216,6 +218,7 @@ function fitCompanion!(z::AbstractVector{T},
     Rz::HomogeneousRegularization;
     auto_calib::Bool = false,
     nonnegative::Bool = false,
+    rho_pix::Real = rho_pixel,
     maxiter::Integer = 10,
     tol::Tuple{Real,Real} = (0.0, 1e-6),
     nu_box::AbstractVector{T} = [50.0, 2.0],
@@ -229,7 +232,7 @@ function fitCompanion!(z::AbstractVector{T},
     rho_nu_star = rho .- nu_star[1]
     Iz = Interpolator(ker, lambda, length(z))
     F_comp = SparseInterpolator(kernel(Iz), lambda, nodes(Iz))
-    H_comp = off_axis_PSF(lambda, rho_nu_star, nu_comp)
+    H_comp = off_axis_PSF(lambda, rho_nu_star, nu_comp; rho_pix=rho_pix)
     SED_z = vcreate(dat)
 
     iter = 0
@@ -253,8 +256,9 @@ function fitCompanion!(z::AbstractVector{T},
         # auto-calibration of off-axis PSF
         if auto_calib
             copyto!(SED_z, F_comp*z)
-            fit_nu_z!(nu_comp, dat, wgt, lambda, rho_nu_star, SED_z; nu_box=nu_box)
-            H_comp = off_axis_PSF(lambda, rho_nu_star, nu_comp)
+            fit_nu_z!(nu_comp, dat, wgt, lambda, rho_nu_star, SED_z; 
+                      rho_pix=rho_pix, nu_box=nu_box)
+            H_comp = off_axis_PSF(lambda, rho_nu_star, nu_comp; rho_pix=rho_pix)
         end
         loss_past = loss
     end

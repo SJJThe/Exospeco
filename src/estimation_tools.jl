@@ -77,21 +77,23 @@ function fit_nu_star!(nu_star::AbstractVector{T},
 end
 
 
+""" 
 """
-"""
+#TODO: mettre rho_pixel en mot clef
 function fit_nu_z!(nu_z::AbstractVector{T},
     dat::AbstractArray{T,N},
     wgt::AbstractArray{T,N},
     lambda::AbstractArray{T,N},
     rho::AbstractArray{T,N},
     SED_z::AbstractArray{T,N};
+    rho_pix::Real = rho_pixel,
     nu_box::AbstractVector{T} = [50.0, 2.0],
     study::Val = Val(false)) where {T,N}
 
     gamma = lambda_ref(lambda) ./ lambda
 
     function f(nu)
-        H_comp_nu = off_axis_PSF(lambda, rho, nu)
+        H_comp_nu = off_axis_PSF(lambda, rho, nu; rho_pix=rho_pix)
         res = gamma .* H_comp_nu .* SED_z - dat
         return vdot(res, wgt, res)
     end
@@ -100,10 +102,10 @@ function fit_nu_z!(nu_z::AbstractVector{T},
     end
     
     nu0 = copy(nu_z)
-    nu_bnd_min = [nu0[1]-nu_box[1], 1.0] .* rho_pixel#nu0 .+ [-nu_box[1], 1.0] .* rho_pixel
-    nu_bnd_max = nu0 .+ nu_box .* rho_pixel
+    nu_bnd_min = [nu0[1]-nu_box[1], 1.0] .* rho_pix#nu0 .+ [-nu_box[1], 1.0] .* rho_pixel
+    nu_bnd_max = nu0 .+ nu_box .* rho_pix
     vcopy!(nu_z, Bobyqa.minimize(f, nu0, nu_bnd_min, nu_bnd_max,
-                                 1*rho_pixel, 1e-3*rho_pixel)[2])#; scale=[])[2])#
+                                 1*rho_pix, 1e-3*rho_pix)[2])#; scale=[])[2])#
 
     return nu_z
 end

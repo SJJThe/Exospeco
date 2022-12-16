@@ -15,7 +15,7 @@ add https://github.com/SJJThe/Exospeco
 
 ### Geometric calibration
 
-The first step toward using `Exospeco` is to obtain the geometric calibration. Either load pre-existing angular separations map `rho`, wavelengths map `lambda` and mask of valid data `mask` into a `GeoCalib` structure:
+The first step toward using `Exospeco` is to obtain the geometric calibration. Either load pre-existing angular separations map `rho` in milliarcseconds, wavelengths map `lambda` in nanometers and mask of valid data `mask` into a `GeoCalib` structure:
 
 ```julia
 using ExospecoCalibration

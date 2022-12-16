@@ -120,12 +120,13 @@ Model of off-axis PSF is a Gaussian
 """
 function off_axis_PSF(lambda::AbstractArray{T,N},
     rho::AbstractArray{T,N},
-    nu_comp::AbstractVector{T}) where {T,N}
+    nu_comp::AbstractVector{T};
+    rho_pix::Real = rho_pixel) where {T,N}
 
     gamma = lambda_ref(lambda) ./lambda
     res_PSF = (gamma .*(rho .- nu_comp[1])) ./nu_comp[2]
     
-    return (1/(sqrt(2*π)*nu_comp[2])) .*exp.(-1/2 .*res_PSF.^2) .*rho_pixel
+    return (1/(sqrt(2*π)*nu_comp[2])) .*exp.(-1/2 .*res_PSF.^2) .*rho_pix
 end
 
 

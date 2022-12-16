@@ -41,7 +41,7 @@ rho_comp = -800*Exospeco.mas
 # Exospeco
 mu_x = 1e1
 mu_z = 5e4
-solvekwds = (ftol=(0.0,1e-5), verb=true)
+solvekwds = (ftol=(0.0,1e-4), verb=true)
 
 (x, y, nu_star, z,
  nu_comp) = exospeco(x_init, y_init, nu_star_init, z_init, nu_comp_init, D, 

@@ -9,6 +9,7 @@ function initialize!(x::AbstractVector{T},
     wgt::AbstractArray{T,N},
     rho::AbstractArray{T,N},
     lambda::AbstractArray{T,N};
+    rho_pix::Real = rho_pixel,
     wordy::Bool = false) where {T,N}
     
     wordy && println("+ Initialization of parameters")
@@ -59,7 +60,7 @@ function initialize!(x::AbstractVector{T},
 
     # init companion geometric parameters nu_comp
     wordy && println("|- init companion geometric parameters nu_comp")
-    push!(nu_comp, 2rho_pixel)
+    push!(nu_comp, 2rho_pix)
     wordy && println("|-- rho_comp = ", nu_comp[1], " mas from center of mask")
     wordy && println("|-- sigma_comp = ", nu_comp[2], " mas of width")
     
