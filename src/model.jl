@@ -103,10 +103,11 @@ function build_A_comp(lambda::AbstractArray{T,N},
     rho::AbstractArray{T,N},
     nu_star::AbstractVector{T},
     nu_comp::AbstractVector{T},
-    Iz::Interpolator{T}) where {T,N}
+    Iz::Interpolator{T};
+    rho_pix::Real = rho_pixel) where {T,N}
     
     gamma = lambda_ref(lambda) ./lambda
-    H_comp = off_axis_PSF(lambda, rho .- nu_star[1], nu_comp)
+    H_comp = off_axis_PSF(lambda, rho .- nu_star[1], nu_comp; rho_pix=rho_pix)
     F_comp = SparseInterpolator(kernel(Iz), lambda, nodes(Iz))
     
     return build_A_comp(gamma, H_comp, F_comp)
@@ -142,11 +143,13 @@ function residuals!(res::AbstractArray{T,N},
     nu_comp::AbstractVector{T},
     y::AbstractVector{T},
     x::AbstractVector{T},
-    z::AbstractVector{T}) where {T,N}
+    z::AbstractVector{T};
+    rho_pix::Real = rho_pixel) where {T,N}
     
     residuals_comp!(res, dat, lambda, rho, nu_star, y, x)
     
-    return residuals_star!(res, res, lambda, rho, nu_star, nu_comp, z)
+    return residuals_star!(res, res, lambda, rho, nu_star, nu_comp, z; 
+                           rho_pix=rho_pix)
 end
 
 function residuals(dat::AbstractArray{T,N},
@@ -156,9 +159,11 @@ function residuals(dat::AbstractArray{T,N},
     nu_comp::AbstractVector{T},
     y::AbstractVector{T},
     x::AbstractVector{T},
-    z::AbstractVector{T}) where {T,N}
+    z::AbstractVector{T};
+    kwds...) where {T,N}
 
-    return residuals!(vcreate(dat), dat, lambda, rho, nu_star, nu_comp, y, x, z)
+    return residuals!(vcreate(dat), dat, lambda, rho, nu_star, nu_comp, y, x, z;
+                      kwds...)
 end
 
 
@@ -170,10 +175,11 @@ function residuals_star!(res::AbstractArray{T,N},
     rho::AbstractArray{T,N},
     nu_star::AbstractVector{T},
     nu_comp::AbstractVector{T},
-    z::AbstractVector{T}) where {T,N}
+    z::AbstractVector{T};
+    rho_pix::Real = rho_pixel) where {T,N}
 
     Iz = Interpolator(ker, lambda, length(z))
-    A_comp = build_A_comp(lambda, rho, nu_star, nu_comp, Iz)
+    A_comp = build_A_comp(lambda, rho, nu_star, nu_comp, Iz; rho_pix=rho_pix)
     copyto!(res, dat - A_comp*z)
 
     return res
@@ -184,9 +190,11 @@ function residuals_star(dat::AbstractArray{T,N},
     rho::AbstractArray{T,N},
     nu_star::AbstractVector{T},
     nu_comp::AbstractVector{T},
-    z::AbstractVector{T}) where {T,N}
+    z::AbstractVector{T};
+    rho_pix::Real = rho_pixel) where {T,N}
 
-    return residuals_star!(vcreate(dat), dat, lambda, rho, nu_star, nu_comp, z)
+    return residuals_star!(vcreate(dat), dat, lambda, rho, nu_star, nu_comp, z; 
+                           rho_pix=rho_pix)
 end
 
 
